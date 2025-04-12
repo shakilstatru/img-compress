@@ -189,17 +189,28 @@
             z-index: -1;
         }
         
+        .upload-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+        
         .upload-area {
+            flex: 1;
+            min-width: 300px;
             border: 2px dashed var(--primary);
             border-radius: 12px;
-            padding: 60px 40px;
+            padding: 40px;
             text-align: center;
             cursor: pointer;
             transition: all 0.4s ease;
-            margin-bottom: 40px;
             background-color: rgba(255, 255, 255, 0.7);
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
         
         .upload-area:hover {
@@ -239,6 +250,36 @@
         
         .upload-area input {
             display: none;
+        }
+        
+        .image-preview {
+            flex: 1;
+            min-width: 300px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            background-color: #f0f0f0;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .image-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            max-height: 300px;
+            background-color: white;
+        }
+        
+        .image-preview .file-info {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-size: 0.9rem;
         }
         
         .controls {
@@ -751,15 +792,22 @@
     
     <div class="container">
         <div class="compressor-container">
-            <div class="upload-area" id="dropArea">
-                <div class="upload-icon">📁</div>
-                <h3>Drag & Drop Your Images Here</h3>
-                <p>or</p>
-                <button class="btn" id="selectFilesBtn">
-                    <span class="btn-icon">🔼</span>
-                    Select Files
-                </button>
-                <input type="file" id="fileInput" accept="image/*" multiple>
+            <div class="upload-container">
+                <div class="upload-area" id="dropArea">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drag & Drop Your Images Here</h3>
+                    <p>or</p>
+                    <button class="btn" id="selectFilesBtn">
+                        <span class="btn-icon">🔼</span>
+                        Select Files
+                    </button>
+                    <input type="file" id="fileInput" accept="image/*" multiple>
+                </div>
+                
+                <div class="image-preview" id="imagePreview">
+                    <img id="uploadedImage" src="" alt="Uploaded Image Preview">
+                    <div class="file-info" id="fileInfo"></div>
+                </div>
             </div>
             
             <div class="controls">
@@ -868,6 +916,9 @@
             const fileInput = document.getElementById('fileInput');
             const selectFilesBtn = document.getElementById('selectFilesBtn');
             const dropArea = document.getElementById('dropArea');
+            const imagePreview = document.getElementById('imagePreview');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const fileInfo = document.getElementById('fileInfo');
             const qualitySlider = document.getElementById('qualitySlider');
             const qualityValue = document.getElementById('qualityValue');
             const qualityDisplay = document.getElementById('qualityDisplay');
@@ -945,7 +996,21 @@
                 
                 const reader = new FileReader();
                 reader.onload = function(e) {
+                    // Show the preview container
+                    imagePreview.style.display = 'block';
+                    
+                    // Set the image source
+                    uploadedImage.src = e.target.result;
                     originalImage.src = e.target.result;
+                    
+                    // Update file info
+                    fileInfo.innerHTML = `
+                        ${file.name}<br>
+                        ${(file.size / 1024).toFixed(2)} KB<br>
+                        ${file.type}
+                    `;
+                    
+                    // Hide results if they were showing
                     results.style.display = 'none';
                 };
                 reader.readAsDataURL(file);
